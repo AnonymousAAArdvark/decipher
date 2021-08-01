@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/andrewyang/CLionProjects/decipher/charset.h
+cstdlib
+-
+vector
+-
+
+/Users/andrewyang/CLionProjects/decipher/main.cpp
+iostream
+-
+utility
+-
+unistd.h
+-
+chrono
+-
+thread
+-
+sys/ttycom.h
+-
+sys/ioctl.h
+-
+termios.h
+-
+random
+-
+charset.h
+/Users/andrewyang/CLionProjects/decipher/charset.h
+
