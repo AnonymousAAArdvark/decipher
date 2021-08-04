@@ -139,10 +139,20 @@ int set_solved_color(char *c) {
     else return 4;
 }
 
+void print_help() {
+    std::cout << "decipher - Hollywood style decryption effect\n\n"
+              << "Example:\n  ls -l / | decipher\n\n"
+              << "Usage:\n"
+              << "  ls -l \\ | decipher -s <speed>  Set decryption speed (higher is faster)\n"
+              << "  ls -l \\ | decipher -a          Set auto decipher flag\n"
+              << "  ls -l \\ | decipher -w          Encrypt whitespace flag\n"
+              << "  ls -l \\ | decipher -c <color>  Set solved color flag\n"
+              << "  ls -l \\ | decipher -h          display this help message\n";
+}
+
 int main(int argc, char* argv[]) {
     if(isatty(STDIN_FILENO)) {
-        std::cout << "This command is meant to work with pipes" << std::endl;
-        std::cout << "Usage: output_command | decipher" << std::endl;
+        print_help();
         return 0;
     }
     int o, color = 4, speed = 6;
@@ -150,7 +160,13 @@ int main(int argc, char* argv[]) {
     while((o = getopt(argc, argv, "s:c:awh")) != -1) {
         switch(o) {
             case 's':
-                speed = (int)strtol(optarg, nullptr, 0);
+                try {
+                    speed = (int)std::stoi(optarg);
+                } catch(const std::invalid_argument&) {
+                    break;
+                } catch(const std::out_of_range&) {
+                    break;
+                }
                 break;
             case 'c':
                 color = set_solved_color(optarg);
@@ -162,19 +178,11 @@ int main(int argc, char* argv[]) {
                 encrypt_wspace = true;
                 break;
             case 'h':
-                std::cout << "decipher - Hollywood style decryption effect\n\n"
-                          << "Example:\n  ls -l / | decipher\n\n"
-                          << "Usage:\n"
-                          << "  ls -l \\ | decipher -s <speed>  Set decryption speed (higher is faster)\n"
-                          << "  ls -l \\ | decipher -a          Set auto decipher flag\n"
-                          << "  ls -l \\ | decipher -w          Encrypt whitespace flag\n"
-                          << "  ls -l \\ | decipher -c <color>  Set solved color flag\n"
-                          << "  ls -l \\ | decipher -h          display this help message\n";
+                print_help();
                 return 0;
             case '?':
-                if(isprint(optopt)) {
+                if(isprint(optopt))
                     std::cerr << "Unknown flag " << (char)optopt << std::endl;
-                }
                 return 1;
             default:
                 break;
