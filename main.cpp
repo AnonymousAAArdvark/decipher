@@ -43,7 +43,7 @@ private:
                 ref = ref.substr(0, i);
                 break;
             }
-            if(isspace(ref[i])) {
+            if((ref[i] == '\n' || !encrypt_wspace) && isspace(ref[i])) {
                 std::cout << ref[i] << std::flush;
             }
             else {
@@ -74,7 +74,9 @@ private:
                     decipher += ref[i];
                     std::cout << "\033[1m" << "\033[3" << color << "m" << ref[i] << "\033[0m";
                 }
-                else if (isspace(ref[i]) || (c > 30 && dist(mt) == 0)) {
+                else if (((ref[i] == '\n' || !encrypt_wspace)
+                        && isspace(ref[i]))
+                        || (c > 30 && dist(mt) == 0)) {
                     solved[i] = true;
                     revealed++;
                     decipher += ref[i];
@@ -157,10 +159,10 @@ int main(int argc, char* argv[]) {
                 std::cout << "decipher - Hollywood style decryption effect\n\n"
                           << "Example:\n  ls -l / | decipher\n\n"
                           << "Usage:\n"
-                          << "  ls -l \\ | decipher -a      Set auto decipher flag\n"
-                          << "  ls -l \\ | decipher -w      Encrypt whitespace flag\n"
-                          << "  ls -l \\ | decipher -c red  Set solved color flag\n"
-                          << "  ls -l \\ | decipher -h      display this help message\n";
+                          << "  ls -l \\ | decipher -a          Set auto decipher flag\n"
+                          << "  ls -l \\ | decipher -w          Encrypt whitespace flag\n"
+                          << "  ls -l \\ | decipher -c <color>  Set solved color flag\n"
+                          << "  ls -l \\ | decipher -h          display this help message\n";
                 return 0;
             case '?':
                 if(isprint(optopt)) {
