@@ -12,7 +12,8 @@
 
 class Decipher {
 public:
-    explicit Decipher(std::string r) : ref(std::move(r)) {
+    explicit Decipher(std::string r, bool a, bool e, int c)
+    : ref(std::move(r)), auto_decipher(a), encrypt_wspace(e), color(c) {
         struct winsize w{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
@@ -52,7 +53,7 @@ private:
             if(ref[i] == '\n') {
                 ++linecount;
                 currwidth = 0;
-            };
+            }
             ++currwidth;
         }
     }
@@ -71,13 +72,13 @@ private:
             for (int i = 0; i < ref.size(); ++i) {
                 if (solved[i]) {
                     decipher += ref[i];
-                    std::cout << "\033[1m" << "\033[34m" << ref[i] << "\033[0m";
+                    std::cout << "\033[1m" << "\033[3" << color << "m" << ref[i] << "\033[0m";
                 }
                 else if (isspace(ref[i]) || (c > 30 && dist(mt) == 0)) {
                     solved[i] = true;
                     revealed++;
                     decipher += ref[i];
-                    std::cout << "\033[1m" << "\033[34m" << ref[i] << "\033[0m";
+                    std::cout << "\033[1m" << "\033[3" << color << "m" << ref[i] << "\033[0m";
                 }
                 else {
                     std::cout << random_char() << std::flush;
@@ -118,20 +119,63 @@ private:
     }
 
     std::string ref;
-    int maxlines, maxwidth, linecount{0};
+    int maxlines, maxwidth, linecount{0}, color;
+    bool auto_decipher, encrypt_wspace;
 };
 
-int main() {
+int set_solved_color(char *c) {
+    if(strcmp("white", c) == 0) return 7;
+    else if(strcmp("yellow", c) == 0) return 3;
+    else if(strcmp("black", c) == 0) return 0;
+    else if(strcmp("magenta", c) == 0) return 5;
+    else if(strcmp("green", c) == 0) return 2;
+    else if(strcmp("red", c) == 0) return 1;
+    else if(strcmp("cyan", c) == 0) return 6;
+    else return 4;
+}
+
+int main(int argc, char* argv[]) {
     if(isatty(STDIN_FILENO)) {
         std::cout << "This command is meant to work with pipes" << std::endl;
         std::cout << "Usage: output_command | decipher" << std::endl;
         return 0;
     }
+    int o, color = 4;
+    bool auto_decipher = false, encrypt_wspace = false;
+    while((o = getopt(argc, argv, "c:awh")) != -1) {
+        switch(o) {
+            case 'c':
+                color = set_solved_color(optarg);
+                break;
+            case 'a':
+                auto_decipher = true;
+                break;
+            case 'w':
+                encrypt_wspace = true;
+                break;
+            case 'h':
+                std::cout << "decipher - Hollywood style decryption effect\n\n"
+                          << "Example:\n  ls -l / | decipher\n\n"
+                          << "Usage:\n"
+                          << "  ls -l \\ | decipher -a      Set auto decipher flag\n"
+                          << "  ls -l \\ | decipher -w      Encrypt whitespace flag\n"
+                          << "  ls -l \\ | decipher -c red  Set solved color flag\n"
+                          << "  ls -l \\ | decipher -h      display this help message\n";
+                return 0;
+            case '?':
+                if(isprint(optopt)) {
+                    std::cerr << "Unknown flag " << (char)optopt << std::endl;
+                }
+                return 1;
+            default:
+                break;
+        }
+    }
     std::string line, output;
     while(std::getline(std::cin, line)) {
         output += line + "\n";
     }
-    Decipher decipher(output);
+    Decipher decipher(output, auto_decipher, encrypt_wspace, color);
     decipher.printCipher();
     return 0;
 }
