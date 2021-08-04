@@ -12,8 +12,8 @@
 
 class Decipher {
 public:
-    explicit Decipher(std::string r, bool a, bool e, int c)
-    : ref(std::move(r)), auto_decipher(a), encrypt_wspace(e), color(c) {
+    explicit Decipher(std::string r, bool a, bool e, int c, int s)
+    : ref(std::move(r)), auto_decipher(a), encrypt_wspace(e), color(c), speed(s) {
         struct winsize w{};
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
@@ -71,7 +71,7 @@ private:
             std::cout << "\x1b[" << linecount << "A";
             decipher = "";
             ++c;
-            std::uniform_int_distribution<int> dist(0, (int)(ref.size() - revealed) / (6));
+            std::uniform_int_distribution<int> dist(0, (int)(ref.size() - revealed) / (speed));
             for (int i = 0; i < ref.size(); ++i) {
                 if (solved[i]) {
                     decipher += ref[i];
@@ -124,7 +124,7 @@ private:
     }
 
     std::string ref;
-    int maxlines, maxwidth, linecount{0}, color;
+    int maxlines, maxwidth, linecount{0}, color, speed;
     bool auto_decipher, encrypt_wspace;
 };
 
@@ -145,10 +145,13 @@ int main(int argc, char* argv[]) {
         std::cout << "Usage: output_command | decipher" << std::endl;
         return 0;
     }
-    int o, color = 4;
+    int o, color = 4, speed = 6;
     bool auto_decipher = false, encrypt_wspace = false;
-    while((o = getopt(argc, argv, "c:awh")) != -1) {
+    while((o = getopt(argc, argv, "s:c:awh")) != -1) {
         switch(o) {
+            case 's':
+                speed = (int)strtol(optarg, nullptr, 0);
+                break;
             case 'c':
                 color = set_solved_color(optarg);
                 break;
@@ -162,6 +165,7 @@ int main(int argc, char* argv[]) {
                 std::cout << "decipher - Hollywood style decryption effect\n\n"
                           << "Example:\n  ls -l / | decipher\n\n"
                           << "Usage:\n"
+                          << "  ls -l \\ | decipher -s <speed>  Set decryption speed (higher is faster)\n"
                           << "  ls -l \\ | decipher -a          Set auto decipher flag\n"
                           << "  ls -l \\ | decipher -w          Encrypt whitespace flag\n"
                           << "  ls -l \\ | decipher -c <color>  Set solved color flag\n"
@@ -180,7 +184,7 @@ int main(int argc, char* argv[]) {
     while(std::getline(std::cin, line)) {
         output += line + "\n";
     }
-    Decipher decipher(output, auto_decipher, encrypt_wspace, color);
+    Decipher decipher(output, auto_decipher, encrypt_wspace, color, speed);
     decipher.printCipher();
     return 0;
 }
