@@ -20,5 +20,13 @@ $ rm -rf /usr/local/bin/decipher
 ```
 ## usage
 ```
-input_message | decipher
+Example:
+  ls -l / | decipher
+
+Usage:
+  ls -l \ | decipher -s <speed>  Set decryption speed (higher is faster)
+  ls -l \ | decipher -a          Set auto decipher flag
+  ls -l \ | decipher -w          Encrypt whitespace flag
+  ls -l \ | decipher -c <color>  Set solved color flag
+  ls -l \ | decipher -h          display this help message
 ```
