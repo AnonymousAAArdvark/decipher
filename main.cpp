@@ -23,7 +23,10 @@ public:
     void printCipher() {
         set_terminal(0);
         create_decipher();
-        getchar();
+        if(auto_decipher)
+            std::this_thread::sleep_for(std::chrono::milliseconds(800));
+        else
+            getchar();
         solve_decipher();
         set_terminal(1);
     }
